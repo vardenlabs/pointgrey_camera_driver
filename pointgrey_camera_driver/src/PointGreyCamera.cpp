@@ -105,7 +105,9 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
 
   // Set shutter time
   double shutter = 1000.0 * config.shutter_speed; // Needs to be in milliseconds
+  printf("setting exposure %f %d %d\n", shutter, bool (config.auto_shutter), retVal);
   retVal &= PointGreyCamera::setProperty(SHUTTER, config.auto_shutter, shutter);
+  printf("exposure set %f %d %d\n", shutter, bool (config.auto_shutter), retVal);
   config.shutter_speed = shutter / 1000.0; // Needs to be in seconds
 
   // Set gain
@@ -507,6 +509,10 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
     Property prop;
     prop.type = type;
     prop.autoManualMode = (autoSet && pInfo.autoSupported);
+    printf("auto supported: %d : %f %d | %d %d\n", type, value, prop.autoManualMode, autoSet, pInfo.autoSupported);
+    if (type == 12) {
+      prop.autoManualMode = 0;
+    }
     prop.absControl = pInfo.absValSupported;
     prop.onOff = pInfo.onOffSupported;
 

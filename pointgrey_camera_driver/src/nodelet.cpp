@@ -92,8 +92,8 @@ private:
 
     try
     {
-      NODELET_DEBUG("Dynamic reconfigure callback with level: %d", level);
-      pg_.setNewConfiguration(config, level);
+      printf("Dynamic reconfigure callback with level: %d\n", level);
+      pg_.setNewConfiguration(config_, level);
 
       // Store needed parameters for the metadata message
       gain_ = config.gain;
