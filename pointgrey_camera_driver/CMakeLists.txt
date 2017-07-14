@@ -5,6 +5,7 @@ find_package(catkin REQUIRED COMPONENTS
   roscpp roslint nodelet sensor_msgs wfov_camera_msgs
   image_exposure_msgs camera_info_manager image_transport
   dynamic_reconfigure diagnostic_updater)
+find_package(resource_monitor REQUIRED)
 
 generate_dynamic_reconfigure_options(
   cfg/PointGrey.cfg
@@ -13,6 +14,8 @@ generate_dynamic_reconfigure_options(
 catkin_package(
   CATKIN_DEPENDS roscpp nodelet
 )
+
+add_definitions(-std=c++11)
 
 # If the user has manually installed flycapture, use the system path version. If not,
 # download it. We can't resolve this dependency using the usual rosdep means because
@@ -30,6 +33,7 @@ if(NOT POINTGREY_LIB)
 endif()
 
 include_directories(include ${catkin_INCLUDE_DIRS})
+include_directories(include ${resource_monitor_INCLUDE_DIRS})
 
 add_library(PointGreyCamera src/PointGreyCamera.cpp)
 target_link_libraries(PointGreyCamera ${POINTGREY_LIB} ${catkin_LIBRARIES})
@@ -37,7 +41,7 @@ add_dependencies(PointGreyCamera ${PROJECT_NAME}_gencfg)
 
 add_library(PointGreyCameraNodelet src/nodelet.cpp)
 add_dependencies(PointGreyCameraNodelet wfov_camera_messages_gencpp)
-target_link_libraries(PointGreyCameraNodelet PointGreyCamera ${catkin_LIBRARIES})
+target_link_libraries(PointGreyCameraNodelet PointGreyCamera ${catkin_LIBRARIES} ${resource_monitor_LIBRARIES})
 
 add_library(PointGreyStereoCameraNodelet src/stereo_nodelet.cpp)
 target_link_libraries(PointGreyStereoCameraNodelet PointGreyCamera ${catkin_LIBRARIES})
