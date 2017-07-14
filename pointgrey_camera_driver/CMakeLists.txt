@@ -36,6 +36,7 @@ target_link_libraries(PointGreyCamera ${POINTGREY_LIB} ${catkin_LIBRARIES})
 add_dependencies(PointGreyCamera ${PROJECT_NAME}_gencfg) 
 
 add_library(PointGreyCameraNodelet src/nodelet.cpp)
+add_dependencies(PointGreyCameraNodelet wfov_camera_messages_gencpp)
 target_link_libraries(PointGreyCameraNodelet PointGreyCamera ${catkin_LIBRARIES})
 
 add_library(PointGreyStereoCameraNodelet src/stereo_nodelet.cpp)
