@@ -49,6 +49,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #include <dynamic_reconfigure/server.h> // Needed for the dynamic_reconfigure gui service to run
 
+#include <resource_monitor/diagnostics.h> // Embark Diagnostics.
+
 namespace pointgrey_camera_driver
 {
 
@@ -207,6 +209,8 @@ private:
     ros::NodeHandle &nh = getMTNodeHandle();
     ros::NodeHandle &pnh = getMTPrivateNodeHandle();
 
+    Diagnostics::init(&nh);
+
     // Get a serial number through ros
     int serial = 0;
 
@@ -309,6 +313,7 @@ private:
 
     while(!boost::this_thread::interruption_requested())   // Block until we need to stop this thread.
     {
+      Diagnostics::log_event_start("PointGreyCameraNodelet", "devicePoll", __PRETTY_FUNCTION__);
       bool state_changed = state != previous_state;
 
       previous_state = state;
@@ -316,6 +321,7 @@ private:
       switch(state)
       {
         case ERROR:
+          Diagnostics::log_event_start("PointGreyCameraNodelet", "devicePoll::ERROR", __PRETTY_FUNCTION__);
           // Generally there's no need to stop before disconnecting after an
           // error. Indeed, stop will usually fail.
 #if STOP_ON_ERROR
@@ -340,9 +346,13 @@ private:
             ros::Duration(1.0).sleep(); // sleep for one second each time
           }
 
+          Diagnostics::log_event_end("PointGreyCameraNodelet", "devicePoll::ERROR", __PRETTY_FUNCTION__);
+
           break;
 #endif
+          Diagnostics::log_event_end("PointGreyCameraNodelet", "devicePoll::ERROR", __PRETTY_FUNCTION__);
         case STOPPED:
+          Diagnostics::log_event_start("PointGreyCameraNodelet", "devicePoll::STOPPED", __PRETTY_FUNCTION__);
           // Try disconnecting from the camera
           try
           {
@@ -359,8 +369,10 @@ private:
             ros::Duration(1.0).sleep(); // sleep for one second each time
           }
 
+          Diagnostics::log_event_end("PointGreyCameraNodelet", "devicePoll::STOPPED", __PRETTY_FUNCTION__);
           break;
         case DISCONNECTED:
+          Diagnostics::log_event_start("PointGreyCameraNodelet", "devicePoll::DISCONNECTED", __PRETTY_FUNCTION__);
           // Try connecting to the camera
           try
           {
@@ -400,8 +412,11 @@ private:
             ros::Duration(1.0).sleep(); // sleep for one second each time
           }
 
+          Diagnostics::log_event_end("PointGreyCameraNodelet", "devicePoll::DISCONNECTED", __PRETTY_FUNCTION__);
+
           break;
         case CONNECTED:
+          Diagnostics::log_event_start("PointGreyCameraNodelet", "devicePoll::CONNECTED", __PRETTY_FUNCTION__);
           // Try starting the camera
           try
           {
@@ -462,6 +477,8 @@ private:
             if(it_pub_.getNumSubscribers() > 0)
             {
               sensor_msgs::ImagePtr image(new sensor_msgs::Image(wfov_image->image));
+              Diagnostics::log_msg_sent(
+                  "Nodelet", "/cam3/image_color/compressed", image.get()->header.stamp, __PRETTY_FUNCTION__);
               it_pub_.publish(image, ci_);
             }
           }
@@ -476,6 +493,8 @@ private:
             state = ERROR;
           }
 
+          Diagnostics::log_event_start("PointGreyCameraNodelet", "devicePoll::CONNECTED", __PRETTY_FUNCTION__);
+
           break;
         default:
           NODELET_ERROR("Unknown camera state %d!", state);
@@ -483,6 +502,7 @@ private:
 
       // Update diagnostics
       updater_.update();
+      Diagnostics::log_event_end("PointGreyCameraNodelet", "devicePoll", __PRETTY_FUNCTION__);
     }
     NODELET_DEBUG("Leaving thread.");
   }
