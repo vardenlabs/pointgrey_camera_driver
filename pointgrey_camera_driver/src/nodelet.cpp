@@ -478,7 +478,7 @@ private:
             {
               sensor_msgs::ImagePtr image(new sensor_msgs::Image(wfov_image->image));
               Diagnostics::log_msg_sent(
-                  "Nodelet", "/cam3/image_color/compressed", image.get()->header.stamp, __PRETTY_FUNCTION__);
+                  "PointGreyCameraNodelet", "/cam3/image_color/compressed", image.get()->header.stamp, __PRETTY_FUNCTION__);
               it_pub_.publish(image, ci_);
             }
           }
