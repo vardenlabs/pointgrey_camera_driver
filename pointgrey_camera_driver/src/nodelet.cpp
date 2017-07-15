@@ -433,8 +433,10 @@ private:
             ros::Duration(1.0).sleep(); // sleep for one second each time
           }
 
+          Diagnostics::log_event_end("PointGreyCameraNodelet", "devicePoll::CONNECTED", __PRETTY_FUNCTION__);
           break;
         case STARTED:
+          Diagnostics::log_event_start("PointGreyCameraNodelet", "devicePoll::STARTED", __PRETTY_FUNCTION__);
           try
           {
             wfov_camera_msgs::WFOVImagePtr wfov_image(new wfov_camera_msgs::WFOVImage);
@@ -493,7 +495,7 @@ private:
             state = ERROR;
           }
 
-          Diagnostics::log_event_start("PointGreyCameraNodelet", "devicePoll::CONNECTED", __PRETTY_FUNCTION__);
+          Diagnostics::log_event_end("PointGreyCameraNodelet", "devicePoll::STARTED", __PRETTY_FUNCTION__);
 
           break;
         default:
