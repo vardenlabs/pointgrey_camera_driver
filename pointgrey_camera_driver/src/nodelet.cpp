@@ -313,7 +313,7 @@ private:
 
     while(!boost::this_thread::interruption_requested())   // Block until we need to stop this thread.
     {
-      LOG_EVENT_START("PointGreyCameraNodelet", "devicePoll");
+      LOG_TIMING_START("PointGreyCameraNodelet", "devicePoll");
       bool state_changed = state != previous_state;
 
       previous_state = state;
@@ -321,7 +321,7 @@ private:
       switch(state)
       {
         case ERROR:
-          LOG_EVENT_START("PointGreyCameraNodelet", "devicePoll::ERROR");
+          LOG_TIMING_START("PointGreyCameraNodelet", "devicePoll::ERROR");
           // Generally there's no need to stop before disconnecting after an
           // error. Indeed, stop will usually fail.
 #if STOP_ON_ERROR
@@ -346,13 +346,13 @@ private:
             ros::Duration(1.0).sleep(); // sleep for one second each time
           }
 
-          LOG_EVENT_END("PointGreyCameraNodelet", "devicePoll::ERROR");
+          LOG_TIMING_END("PointGreyCameraNodelet", "devicePoll::ERROR");
 
           break;
 #endif
-          LOG_EVENT_END("PointGreyCameraNodelet", "devicePoll::ERROR");
+          LOG_TIMING_END("PointGreyCameraNodelet", "devicePoll::ERROR");
         case STOPPED:
-          LOG_EVENT_START("PointGreyCameraNodelet", "devicePoll::STOPPED");
+          LOG_TIMING_START("PointGreyCameraNodelet", "devicePoll::STOPPED");
           // Try disconnecting from the camera
           try
           {
@@ -369,10 +369,10 @@ private:
             ros::Duration(1.0).sleep(); // sleep for one second each time
           }
 
-          LOG_EVENT_END("PointGreyCameraNodelet", "devicePoll::STOPPED");
+          LOG_TIMING_END("PointGreyCameraNodelet", "devicePoll::STOPPED");
           break;
         case DISCONNECTED:
-          LOG_EVENT_START("PointGreyCameraNodelet", "devicePoll::DISCONNECTED");
+          LOG_TIMING_START("PointGreyCameraNodelet", "devicePoll::DISCONNECTED");
           // Try connecting to the camera
           try
           {
@@ -412,11 +412,11 @@ private:
             ros::Duration(1.0).sleep(); // sleep for one second each time
           }
 
-          LOG_EVENT_END("PointGreyCameraNodelet", "devicePoll::DISCONNECTED");
+          LOG_TIMING_END("PointGreyCameraNodelet", "devicePoll::DISCONNECTED");
 
           break;
         case CONNECTED:
-          LOG_EVENT_START("PointGreyCameraNodelet", "devicePoll::CONNECTED");
+          LOG_TIMING_START("PointGreyCameraNodelet", "devicePoll::CONNECTED");
           // Try starting the camera
           try
           {
@@ -433,10 +433,10 @@ private:
             ros::Duration(1.0).sleep(); // sleep for one second each time
           }
 
-          LOG_EVENT_END("PointGreyCameraNodelet", "devicePoll::CONNECTED");
+          LOG_TIMING_END("PointGreyCameraNodelet", "devicePoll::CONNECTED");
           break;
         case STARTED:
-          LOG_EVENT_START("PointGreyCameraNodelet", "devicePoll::STARTED");
+          LOG_TIMING_START("PointGreyCameraNodelet", "devicePoll::STARTED");
           try
           {
             wfov_camera_msgs::WFOVImagePtr wfov_image(new wfov_camera_msgs::WFOVImage);
@@ -494,7 +494,7 @@ private:
             state = ERROR;
           }
 
-          LOG_EVENT_END("PointGreyCameraNodelet", "devicePoll::STARTED");
+          LOG_TIMING_END("PointGreyCameraNodelet", "devicePoll::STARTED");
 
           break;
         default:
@@ -503,7 +503,7 @@ private:
 
       // Update diagnostics
       updater_.update();
-      LOG_EVENT_END("PointGreyCameraNodelet", "devicePoll");
+      LOG_TIMING_END("PointGreyCameraNodelet", "devicePoll");
     }
     NODELET_DEBUG("Leaving thread.");
   }
