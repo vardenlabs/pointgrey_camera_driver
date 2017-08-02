@@ -464,7 +464,7 @@ private:
             // The height, width, distortion model, and parameters are all filled in by camera info manager.
             ci_->binning_x = binning_x_;
             ci_->binning_y = binning_y_;
-            ci_->roi.x_offset = roi_x_offset_;
+            ci_->roi.x_offset = 0;
             ci_->roi.y_offset = roi_y_offset_;
             ci_->roi.height = roi_height_;
             ci_->roi.width = roi_width_;
