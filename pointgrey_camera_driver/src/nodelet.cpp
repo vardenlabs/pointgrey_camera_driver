@@ -465,9 +465,9 @@ private:
             ci_->binning_x = binning_x_;
             ci_->binning_y = binning_y_;
             ci_->roi.x_offset = 0;
-            ci_->roi.y_offset = roi_y_offset_;
-            ci_->roi.height = roi_height_;
-            ci_->roi.width = roi_width_;
+            ci_->roi.y_offset = 0;
+            ci_->roi.height = 0;
+            ci_->roi.width = 0;
             ci_->roi.do_rectify = do_rectify_;
 
             wfov_image->info = *ci_;
