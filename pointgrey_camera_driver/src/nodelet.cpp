@@ -343,7 +343,7 @@ private:
           {
             NODELET_ERROR_COND(state_changed,
                 "Failed to stop error: %s", e.what());
-            ros::Duration(1.0).sleep(); // sleep for one second each time
+            ros::Duration(0.5).sleep(); // sleep for one second each time
           }
 
           LOG_TIMING_END("PointGreyCameraNodelet", "devicePoll::ERROR");
@@ -366,7 +366,7 @@ private:
           {
             NODELET_ERROR_COND(state_changed,
                 "Failed to disconnect with error: %s", e.what());
-            ros::Duration(1.0).sleep(); // sleep for one second each time
+            ros::Duration(0.5).sleep(); // sleep for one second each time
           }
 
           LOG_TIMING_END("PointGreyCameraNodelet", "devicePoll::STOPPED");
@@ -409,7 +409,7 @@ private:
           {
             NODELET_ERROR_COND(state_changed,
                 "Failed to connect with error: %s", e.what());
-            ros::Duration(1.0).sleep(); // sleep for one second each time
+            ros::Duration(0.5).sleep(); // sleep for one second each time
           }
 
           LOG_TIMING_END("PointGreyCameraNodelet", "devicePoll::DISCONNECTED");
@@ -430,7 +430,7 @@ private:
           {
             NODELET_ERROR_COND(state_changed,
                 "Failed to start with error: %s", e.what());
-            ros::Duration(1.0).sleep(); // sleep for one second each time
+            ros::Duration(0.5).sleep(); // sleep for one second each time
           }
 
           LOG_TIMING_END("PointGreyCameraNodelet", "devicePoll::CONNECTED");
