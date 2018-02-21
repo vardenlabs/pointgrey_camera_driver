@@ -1,0 +1,9 @@
+<launch>
+    <arg name="camera2" default="/cam2/image_color /cam2/image_color_transformed"/>
+    <node name="camera_transformer" 
+        pkg="camera_transformer" 
+        type="camera_transformer_node"
+        output="screen"
+        args="--camera $(arg camera2)">
+    </node>
+</launch>
