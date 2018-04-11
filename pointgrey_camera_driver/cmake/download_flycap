@@ -36,49 +36,36 @@ import os
 
 logging.basicConfig(level=logging.INFO)
 
-LOGIN_URL = 'https://www.ptgrey.com/login'
-LOGIN_DATA = {
-    'Email': 'code@clearpathrobotics.com',
-    'Password': 'uNjRxoH6NMsJvi6hyPCH'
-    }
-
 ARCHS = {
     'x86_64': (
-        'https://www.ptgrey.com/support/downloads/10617', (
+        'flycapture2-2.9.3.43-amd64-pkg.tgz', (
             'flycapture2-2.9.3.43-amd64/libflycapture-2.9.3.43_amd64.deb',
             'flycapture2-2.9.3.43-amd64/libflycapture-2.9.3.43_amd64-dev.deb'),
         'usr/lib/libflycapture.so.2.9.3.43'),
     'i386': (
-        'https://www.ptgrey.com/support/downloads/10619', (
+        'flycapture2-2.9.3.43-i386-pkg.tgz', (
             'flycapture2-2.9.3.43-i386/libflycapture-2.9.3.43_i386.deb',
             'flycapture2-2.9.3.43-i386/libflycapture-2.9.3.43_i386-dev.deb'),
         'usr/lib/libflycapture.so.2.9.3.43'),
     'armv7': (
-        'http://www.ptgrey.com/support/downloads/10047/', 
+        'flycapture.2.6.3.4_armhf.tar.gz', 
             'flycapture.2.6.3.4_armhf',
             'usr/lib/libflycapture.so.2.6.3.4')
     }
 
 if (sys.argv[1] == 'armv7'):
-    archive_url, folder_name, shared_library = ARCHS[sys.argv[1]]
+    tarname, folder_name, shared_library = ARCHS[sys.argv[1]]
 else:
-    archive_url, debs, shared_library = ARCHS[sys.argv[1]]
+    tarname, debs, shared_library = ARCHS[sys.argv[1]]
 
 library_dest = sys.argv[2]
 
-logging.info("Logging into ptgrey.com.")
-cj = cookielib.CookieJar()
-opener = urllib2.build_opener(urllib2.HTTPCookieProcessor(cj))
-opener.addheaders = [
-    ('User-agent', 'Mozilla/5.0'),
-    ('Referer', 'https://www.ptgrey.com')]
-opener.open(LOGIN_URL, urllib.urlencode(LOGIN_DATA))
+deb_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../deb')
 
-logging.info("Downloading SDK archive.")
-resp = opener.open(archive_url)
-
+logging.info("Not logging into ptgrey.com. Rejoice.")
+logging.info("Not downloading SDK archive.")
 logging.info("Unpacking tarball.")
-with tarfile.open(mode="r:gz", fileobj=cStringIO.StringIO(resp.read())) as tar:
+with tarfile.open(name=os.path.join(deb_dir, tarname), mode="r:gz") as tar:
     tar.extractall()
 
 if (sys.argv[1] == 'armv7'):
