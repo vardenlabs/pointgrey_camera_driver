@@ -2,6 +2,52 @@
 Changelog for package pointgrey_camera_driver
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
+0.13.4 (2017-10-26)
+-------------------
+* Build jessie binaries with the legacy SDK as well.
+* Contributors: Mike Purvis
+
+0.13.3 (2017-10-03)
+-------------------
+* Assume current library version for all OSes other than trusty. (`#146 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/146>`_)
+* Contributors: Mike Purvis
+
+0.13.2 (2017-09-28)
+-------------------
+* Adding camera consistency exception. (`#142 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/142>`_)
+* Use find_path to look for system headers. (`#139 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/139>`_)
+* Added support to RGB8 pixel format and controls for sharpness and saturation (`#116 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/116>`_)
+  * Added support to RGB8 pixel format and controls for sharpness and saturation
+  * removed whitespaces and reverted changes to camera launch
+* Consolidate udev rules. (`#131 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/131>`_)
+* Require flycapture library and header files (`#112 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/112>`_)
+* Add multi-release support, bump SDK to 2.11.3.121 for xenial and 2.9.3.43 for trusty (`#127 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/127>`_)
+* Contributors: Bei Chen Liu, Mike Purvis, Mohammed Al-Qizwini, Vitor Matos, kmhallen
+
+0.13.1 (2017-04-19)
+-------------------
+* Add flycapture2 lib download rule for aarch64(e.g. Jetson TX1) (`#93 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/93>`_)
+* Make flycap d/l logic work on re-build. (`#109 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/109>`_)
+* Fix missing roslaunch dep, package format 2.
+
+0.13.0 (2017-03-17)
+-------------------
+* Adding param to provide path to serial location.
+* Fix flycapture install when using local copy.
+* Fix thread leaking issue.
+* Added stereo launch file and enabled roslaunch checkes for all launch files.
+* Enabling GigE packet resend by default (`#97 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/97>`_)
+* Enabling 16bit Bayer format (`#98 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/98>`_)
+* Allow strobe shorter than 1ms (`#99 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/99>`_)
+* Add option to strobe on GPIO2. (`#91 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/91>`_)
+* Added Format7_Mode5 and Format7_Mode7 options for Video Modes. (`#90 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/90>`_)
+* Improve white balance initialisation and logic. (`#95 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/95>`_)
+* Added Format7_Mode4 option for Video Modes. (`#87 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/87>`_)
+* Added new camera model (`#86 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/86>`_)
+* Added the option to use the format7_mode4. (`#84 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/84>`_)
+* Adding string parameter fallback. (`#81 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/81>`_)
+* Contributors: Benjamin Blumer, Brian Holt, Devon Ash, Enrique Fernandez, Kazumi Malhan, Léonard Gérard, Mike O'Driscoll, Nicola Castaman, Tony Baltovski, Tracey Spicer, fabrizioschiano
+
 0.12.2 (2016-09-30)
 -------------------
 * Reconnect on error (`#79 <https://github.com/ros-drivers/pointgrey_camera_driver/issues/79>`_)
