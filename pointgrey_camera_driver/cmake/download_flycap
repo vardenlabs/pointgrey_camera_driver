@@ -92,11 +92,13 @@ if arch.startswith('arm'):
 else:
     archive_url, debs, shared_library = ARCHS[arch][library_version]
 
+tarname = debs[0].split('/')[0] + '-pkg.tgz'
 deb_dir = os.path.join(os.path.dirname(os.path.realpath(__file__)), '../deb')
 
 logging.info("Not logging into ptgrey.com. Rejoice.")
 logging.info("Not downloading SDK archive.")
 logging.info("Unpacking tarball.")
+
 with tarfile.open(name=os.path.join(deb_dir, tarname), mode="r:gz") as tar:
     tar.extractall()
 
