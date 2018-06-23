@@ -11,11 +11,11 @@
 
   <group ns="$(arg camera_name)" >
     <group ns="left" >
-      <node pkg="nodelet" type="nodelet" name="camera_nodelet_manager" args="manager" />
+      <node pkg="nodelet" type="nodelet" name="camera_nodelet_manager" args="manager"  launch-prefix="log_stdout" />
 
       <!-- Both cameras are not loaded into one nodelet manager to avoid the namespacing issue. -->
       <node pkg="nodelet" type="nodelet" name="camera_nodelet"
-            args="load pointgrey_camera_driver/PointGreyCameraNodelet camera_nodelet_manager" >
+            args="load pointgrey_camera_driver/PointGreyCameraNodelet camera_nodelet_manager"  launch-prefix="log_stdout" >
         <param name="frame_id" value="camera_left" />
         <param name="serial" value="$(arg left_camera_serial)" />
 
@@ -30,15 +30,15 @@
       </node>
 
       <node pkg="nodelet" type="nodelet" name="image_proc_debayer"
-          args="load image_proc/debayer camera_nodelet_manager">
+          args="load image_proc/debayer camera_nodelet_manager" launch-prefix="log_stdout" >
       </node>
     </group>
 
     <group ns="right" >
-      <node pkg="nodelet" type="nodelet" name="camera_nodelet_manager" args="manager" />
+      <node pkg="nodelet" type="nodelet" name="camera_nodelet_manager" args="manager"  launch-prefix="log_stdout" />
 
       <node pkg="nodelet" type="nodelet" name="camera_nodelet"
-            args="load pointgrey_camera_driver/PointGreyCameraNodelet camera_nodelet_manager" >
+            args="load pointgrey_camera_driver/PointGreyCameraNodelet camera_nodelet_manager"  launch-prefix="log_stdout" >
         <param name="frame_id" value="camera_right" />
         <param name="serial" value="$(arg right_camera_serial)" />
 
@@ -53,12 +53,12 @@
       </node>
 
       <node pkg="nodelet" type="nodelet" name="image_proc_debayer"
-          args="load image_proc/debayer camera_nodelet_manager">
+          args="load image_proc/debayer camera_nodelet_manager" launch-prefix="log_stdout" >
       </node>
 
     </group>
 
-    <node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc">
+    <node pkg="stereo_image_proc" type="stereo_image_proc" name="stereo_image_proc" launch-prefix="log_stdout" >
       <param name="approximate_sync" value="true"/>
     </node>
 
