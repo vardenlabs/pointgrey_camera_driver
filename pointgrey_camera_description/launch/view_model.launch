@@ -16,16 +16,19 @@
 
     <!-- Spawn the robot in Gazebo -->
     <node name="urdf_spawner" pkg="gazebo_ros" type="spawn_model"
-          args="-urdf -model $(arg camera) -param robot_description" />
+          args="-urdf -model $(arg camera) -param robot_description" 
+          launch-prefix="log_stdout" />
   </group>
 
-  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" />
+  <node name="robot_state_publisher" pkg="robot_state_publisher" type="robot_state_publisher" respawn="false" 
+   launch-prefix="log_stdout" />
 
   <!-- Load URDF -->
   <param name="robot_description"
     command="$(find xacro)/xacro.py '$(find pointgrey_camera_description)/urdf/test_$(arg camera).urdf.xacro'" />
 
   <group if="$(arg use_rviz)">
-    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find pointgrey_camera_description)/rviz/view_$(arg camera).rviz" />
+    <node name="rviz" pkg="rviz" type="rviz" args="-d $(find pointgrey_camera_description)/rviz/view_$(arg camera).rviz" 
+     launch-prefix="log_stdout" />
   </group>
 </launch>
