@@ -884,10 +884,9 @@ void PointGreyCamera::connect()
       std::string msg = "PointGreyCamera::connect Could not find camera with serial number: " + serial_string.str() + ". Is that camera plugged in?";
       PointGreyCamera::handleError(msg, error);
     }
-    else     // Connect to any camera (the first)
+    else     // No serial specified
     {
-      error  = busMgr_.GetCameraFromIndex(0, &guid);
-      PointGreyCamera::handleError("PointGreyCamera::connect Failed to get first connected camera", error);
+      PointGreyCamera::handleError("PointGreyCamera::connect No serial number specified for camera", PGRERROR_NOT_FOUND, "");
     }
 
     FlyCapture2::InterfaceType ifType;
@@ -1210,22 +1209,27 @@ std::vector<uint32_t> PointGreyCamera::getAttachedCameras()
   return cameras;
 }
 
-void PointGreyCamera::handleError(const std::string &prefix, const FlyCapture2::Error &error)
+void PointGreyCamera::handleError(const std::string &prefix, const FlyCapture2::Error &error) {
+  handleError(prefix, error.GetType(), std::string(error.GetDescription()));
+}
+
+void PointGreyCamera::handleError(const std::string &prefix,
+				  const FlyCapture2::ErrorType error_type,
+				  const std::string& desc)
 {
-  if(error == PGRERROR_TIMEOUT)
+  if(error_type == PGRERROR_TIMEOUT)
   {
     throw CameraTimeoutException("PointGreyCamera: Failed to retrieve buffer within timeout.");
   }
-  else if(error == PGRERROR_IMAGE_CONSISTENCY_ERROR)
+  else if(error_type == PGRERROR_IMAGE_CONSISTENCY_ERROR)
   {
     throw CameraImageConsistencyError("PointGreyCamera: Image consistency error.");
   }
-  else if(error != PGRERROR_OK)     // If there is actually an error (PGRERROR_OK means the function worked as intended...)
+  else if(error_type != PGRERROR_OK)     // If there is actually an error (PGRERROR_OK means the function worked as intended...)
   {
     std::string start(" | FlyCapture2::ErrorType ");
     std::stringstream out;
-    out << error.GetType();
-    std::string desc(error.GetDescription());
+    out << error_type;
     throw std::runtime_error(prefix + start + out.str() + " " + desc);
   }
 }
