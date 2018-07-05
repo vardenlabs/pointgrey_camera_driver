@@ -353,6 +353,13 @@ public:
   */
   static void handleError(const std::string &prefix, const FlyCapture2::Error &error);
 
+ /*!
+  * \brief Variant of handleError that works on raw FlyCapture2::ErrorType
+  */
+  static void handleError(const std::string &prefix,
+			  const FlyCapture2::ErrorType error_type,
+			  const std::string& desc);
+
 };
 
 #endif
