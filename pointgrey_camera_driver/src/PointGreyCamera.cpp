@@ -191,13 +191,22 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
   return retVal;
 }
 
+// this is intended to be called from a callback
 void PointGreyCamera::setGain(double &gain)
 {
+  // Activate mutex to prevent us from grabbing images during this time
+  boost::mutex::scoped_lock scopedLock(mutex_);
+  
   PointGreyCamera::setProperty(GAIN, false, gain);
 }
 
+// this is intended to be called from a callback
 void PointGreyCamera::setBRWhiteBalance(bool auto_white_balance, uint16_t &blue, uint16_t &red)
 {
+  // Activate mutex to prevent us from grabbing images during this time
+  boost::mutex::scoped_lock scopedLock(mutex_);
+  
+
   PointGreyCamera::setWhiteBalance(auto_white_balance, blue, red);
 }
 
