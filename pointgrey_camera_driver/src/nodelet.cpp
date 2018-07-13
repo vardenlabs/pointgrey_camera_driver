@@ -97,7 +97,7 @@ private:
 
     try
     {
-      NODELET_DEBUG("Dynamic reconfigure callback with level: %d", level);
+      ROS_INFO("Dynamic reconfigure callback with level: %d", level);
       pg_.setNewConfiguration(config, level);
 
       // Store needed parameters for the metadata message

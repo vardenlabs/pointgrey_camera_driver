@@ -476,10 +476,37 @@ bool PointGreyCamera::getFormat7PixelFormatFromString(std::string &sformat, FlyC
   return retVal;
 }
 
+static std::vector<std::string> propNames = {
+                "BRIGHTNESS", /**< Brightness. */
+                "AUTO_EXPOSURE", /**< Auto exposure. */
+                "SHARPNESS", /**< Sharpness */
+                "WHITE_BALANCE", /**< White balance. */
+                "HUE", /**< Hue. */
+                "SATURATION", /**< Saturation. */
+                "GAMMA", /**< Gamma. */
+                "IRIS", /**< Iris. */
+                "FOCUS", /**< Focus. */
+                "ZOOM", /**< Zoom. */
+                "PAN", /**< Pan. */
+                "TILT", /**< Tilt. */
+                "SHUTTER", /**< Shutter. */
+                "GAIN", /**< Gain. */
+                "TRIGGER_MODE", /**< Trigger mode. */
+                "TRIGGER_DELAY", /**< Trigger delay. */
+                "FRAME_RATE", /**< Frame rate. */
+                "TEMPERATURE", /**< Temperature. */
+};
+
 bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const bool &autoSet, unsigned int &valueA, unsigned int &valueB)
 {
   // return true if we can set values as desired.
   bool retVal = true;
+
+  const double orig_valueA = valueA;
+  const double orig_valueB = valueB;
+  double adjusted_valueA = valueA;
+  double adjusted_valueB = valueB;
+  ROS_INFO_STREAM("setProperty(): " << propNames.at(static_cast<int>(type)) << " auto: " << autoSet << " A: " << valueA << " B: " << valueB);
 
   PropertyInfo pInfo;
   pInfo.type = type;
@@ -504,6 +531,10 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
       valueA = pInfo.max;
       retVal &= false;
     }
+    if (valueA != orig_valueA) {
+      ROS_ERROR_STREAM("setProperty(): " << propNames.at(static_cast<int>(type)) << " valueA " << orig_valueA << " outside range ("<< pInfo.min << ", " << pInfo.max << ")");      
+    }
+
     if(valueB < pInfo.min)
     {
       valueB = pInfo.min;
@@ -514,6 +545,13 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
       valueB = pInfo.max;
       retVal &= false;
     }
+    if (valueB != orig_valueB) {
+      ROS_ERROR_STREAM("setProperty(): " << propNames.at(static_cast<int>(type)) << " valueB " << orig_valueB << " outside range ("<< pInfo.min << ", " << pInfo.max << ")");      
+    }
+
+    adjusted_valueA = valueA;
+    adjusted_valueB = valueB;
+
     prop.valueA = valueA;
     prop.valueB = valueB;
     error = cam_.SetProperty(&prop);
@@ -533,12 +571,23 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
     valueA = 0;
     valueB = 0;
   }
+  if (valueA != adjusted_valueA) {
+    ROS_ERROR_STREAM("setProperty(): " << propNames.at(static_cast<int>(type)) << " valueA not set: " << adjusted_valueA << " != " << valueA);
+  }
+  if (valueB != adjusted_valueB) {
+    ROS_ERROR_STREAM("setProperty(): " << propNames.at(static_cast<int>(type)) << " valueB not set: " << adjusted_valueB << " != " << valueB);
+  }
 
   return retVal;
 }
 
 bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const bool &autoSet, double &value)
 {
+  const double orig_value = value;
+  double adjusted_value = value;
+
+  ROS_INFO_STREAM("SetProperty(): " << propNames.at(static_cast<int>(type)) << " auto: " << autoSet << " value: " << value);
+
   // return true if we can set values as desired.
   bool retVal = true;
 
@@ -565,6 +614,11 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
       value = pInfo.absMax;
       retVal &= false;
     }
+    if (value != orig_value) {
+      ROS_ERROR_STREAM("setProperty(): " << propNames.at(static_cast<int>(type)) << " value " << orig_value << " outside range ("<< pInfo.absMin << ", " << pInfo.absMax << ")");
+    }
+
+    adjusted_value = value;
     prop.absValue = value;
     error = cam_.SetProperty(&prop);
     PointGreyCamera::handleError("PointGreyCamera::setProperty  Failed to set property ", error); /** @todo say which property? */
@@ -581,6 +635,10 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
   {
     value = 0.0;
   }
+  if (value != adjusted_value) {
+    ROS_ERROR_STREAM("setProperty(): " << propNames.at(static_cast<int>(type)) << " value not set: " << adjusted_value << " != " << value);
+  }
+
   return retVal;
 }
 
