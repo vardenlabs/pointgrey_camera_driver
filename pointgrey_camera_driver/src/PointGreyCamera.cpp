@@ -98,9 +98,6 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
     }
   }
 
-  // Set frame rate
-  //retVal &= PointGreyCamera::setProperty(FRAME_RATE, false, config.frame_rate);
-
   // Set exposure
   retVal &= PointGreyCamera::setProperty(AUTO_EXPOSURE, config.auto_exposure, config.exposure);
 
@@ -157,7 +154,7 @@ bool PointGreyCamera::setNewConfiguration(pointgrey_camera_driver::PointGreyConf
       retVal &= false;
   }
 
-  // Set frame rate
+  // Set frame rate (after trigger, otherwise it might be ignored)
   retVal &= PointGreyCamera::setProperty(FRAME_RATE, false, config.frame_rate);
 
   // Set strobe
