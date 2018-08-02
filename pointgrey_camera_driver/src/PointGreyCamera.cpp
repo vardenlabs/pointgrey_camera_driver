@@ -796,7 +796,7 @@ bool PointGreyCamera::setExternalStrobe(bool &enable, const std::string &dest, d
 
 bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::string &source, int32_t &parameter, double &delay, bool &polarityHigh)
 {
-  ROS_INFO_STREAM("setupExternalTrigger(): enable: " << enable << 
+  ROS_INFO_STREAM("setExternalTrigger(): enable: " << enable << 
 		  " mode: " << mode << " source: " << source << 
 		  " parameter: " << parameter << " delay: " << delay <<
 		  " polarityHigh: " << polarityHigh);
@@ -869,10 +869,17 @@ bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::s
   PointGreyCamera::handleError("PointGreyCamera::setExternalTrigger Could not set trigger mode.", error);
   error = cam_.GetTriggerMode(&triggerMode);
   PointGreyCamera::handleError("PointGreyCamera::setExternalTrigger Could not get trigger mode.", error);
+  if (triggerMode.onOff != enable) {
+    ROS_WARN_STREAM("setExternalTrigger(): enable not set: " << enable << " != " << triggerMode.onOff);
+  }
   enable = triggerMode.onOff;
   std::stringstream buff;
   buff << "mode" << triggerMode.mode;
-  mode = buff.str();
+  const std::string new_mode = buff.str();
+  if (new_mode != mode) {
+    ROS_WARN_STREAM("setExternalTrigger(): mode not set: " << mode << " != " << new_mode);
+  }
+  mode = new_mode;
 
   /** @todo, check delay min and max values */
 
@@ -886,6 +893,9 @@ bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::s
   PointGreyCamera::handleError("PointGreyCamera::setExternalTrigger Could not set trigger delay.", error);
   error = cam_.GetTriggerDelay(&triggerDelay);
   PointGreyCamera::handleError("PointGreyCamera::setExternalTrigger Could not get trigger delay.", error);
+  if (triggerDelay.absValue != delay) {
+    ROS_WARN_STREAM("setExternalTrigger(): delay not set: " << delay << " != " << triggerDelay.absValue);
+  }
   delay = triggerDelay.absValue;
 
   return retVal;
