@@ -502,8 +502,8 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
   // return true if we can set values as desired.
   bool retVal = true;
 
-  const double orig_valueA = valueA;
-  const double orig_valueB = valueB;
+  const double requested_valueA = valueA;
+  const double requested_valueB = valueB;
   double adjusted_valueA = valueA;
   double adjusted_valueB = valueB;
   ROS_INFO_STREAM("setProperty(): " << propNames.at(static_cast<int>(type)) << " auto: " << autoSet << " A: " << valueA << " B: " << valueB);
@@ -531,8 +531,8 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
       valueA = pInfo.max;
       retVal &= false;
     }
-    if (valueA != orig_valueA) {
-      ROS_ERROR_STREAM("setProperty(): " << propNames.at(static_cast<int>(type)) << " valueA " << orig_valueA << " outside range ("<< pInfo.min << ", " << pInfo.max << ")");      
+    if (valueA != requested_valueA) {
+      ROS_WARN_STREAM("setProperty(): " << propNames.at(static_cast<int>(type)) << " valueA " << requested_valueA << " outside range ("<< pInfo.min << ", " << pInfo.max << ")");      
     }
 
     if(valueB < pInfo.min)
@@ -545,8 +545,8 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
       valueB = pInfo.max;
       retVal &= false;
     }
-    if (valueB != orig_valueB) {
-      ROS_ERROR_STREAM("setProperty(): " << propNames.at(static_cast<int>(type)) << " valueB " << orig_valueB << " outside range ("<< pInfo.min << ", " << pInfo.max << ")");      
+    if (valueB != requested_valueB) {
+      ROS_WARN_STREAM("setProperty(): " << propNames.at(static_cast<int>(type)) << " valueB " << requested_valueB << " outside range ("<< pInfo.min << ", " << pInfo.max << ")");      
     }
 
     adjusted_valueA = valueA;
@@ -572,10 +572,10 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
     valueB = 0;
   }
   if (valueA != adjusted_valueA) {
-    ROS_ERROR_STREAM("setProperty(): " << propNames.at(static_cast<int>(type)) << " valueA not set: " << adjusted_valueA << " != " << valueA);
+    ROS_WARN_STREAM("setProperty(): " << propNames.at(static_cast<int>(type)) << " valueA not set: " << adjusted_valueA << " != " << valueA);
   }
   if (valueB != adjusted_valueB) {
-    ROS_ERROR_STREAM("setProperty(): " << propNames.at(static_cast<int>(type)) << " valueB not set: " << adjusted_valueB << " != " << valueB);
+    ROS_WARN_STREAM("setProperty(): " << propNames.at(static_cast<int>(type)) << " valueB not set: " << adjusted_valueB << " != " << valueB);
   }
 
   return retVal;
@@ -583,7 +583,7 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
 
 bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const bool &autoSet, double &value)
 {
-  const double orig_value = value;
+  const double requested_value = value;
   double adjusted_value = value;
 
   ROS_INFO_STREAM("SetProperty(): " << propNames.at(static_cast<int>(type)) << " auto: " << autoSet << " value: " << value);
@@ -614,8 +614,8 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
       value = pInfo.absMax;
       retVal &= false;
     }
-    if (value != orig_value) {
-      ROS_ERROR_STREAM("setProperty(): " << propNames.at(static_cast<int>(type)) << " value " << orig_value << " outside range ("<< pInfo.absMin << ", " << pInfo.absMax << ")");
+    if (value != requested_value) {
+      ROS_WARN_STREAM("setProperty(): " << propNames.at(static_cast<int>(type)) << " value " << requested_value << " outside range ("<< pInfo.absMin << ", " << pInfo.absMax << ")");
     }
 
     adjusted_value = value;
@@ -636,7 +636,7 @@ bool PointGreyCamera::setProperty(const FlyCapture2::PropertyType &type, const b
     value = 0.0;
   }
   if (value != adjusted_value) {
-    ROS_ERROR_STREAM("setProperty(): " << propNames.at(static_cast<int>(type)) << " value not set: " << adjusted_value << " != " << value);
+    ROS_WARN_STREAM("setProperty(): " << propNames.at(static_cast<int>(type)) << " value not set: " << adjusted_value << " != " << value);
   }
 
   return retVal;
@@ -796,6 +796,11 @@ bool PointGreyCamera::setExternalStrobe(bool &enable, const std::string &dest, d
 
 bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::string &source, int32_t &parameter, double &delay, bool &polarityHigh)
 {
+  ROS_INFO_STREAM("setExternalTrigger(): enable: " << enable << 
+		  " mode: " << mode << " source: " << source << 
+		  " parameter: " << parameter << " delay: " << delay <<
+		  " polarityHigh: " << polarityHigh);
+
   // return true if we can set values as desired.
   bool retVal = true;
   // Check for external trigger support
@@ -864,10 +869,17 @@ bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::s
   PointGreyCamera::handleError("PointGreyCamera::setExternalTrigger Could not set trigger mode.", error);
   error = cam_.GetTriggerMode(&triggerMode);
   PointGreyCamera::handleError("PointGreyCamera::setExternalTrigger Could not get trigger mode.", error);
+  if (triggerMode.onOff != enable) {
+    ROS_WARN_STREAM("setExternalTrigger(): enable not set: " << enable << " != " << triggerMode.onOff);
+  }
   enable = triggerMode.onOff;
   std::stringstream buff;
   buff << "mode" << triggerMode.mode;
-  mode = buff.str();
+  const std::string new_mode = buff.str();
+  if (new_mode != mode) {
+    ROS_WARN_STREAM("setExternalTrigger(): mode not set: " << mode << " != " << new_mode);
+  }
+  mode = new_mode;
 
   /** @todo, check delay min and max values */
 
@@ -881,6 +893,9 @@ bool PointGreyCamera::setExternalTrigger(bool &enable, std::string &mode, std::s
   PointGreyCamera::handleError("PointGreyCamera::setExternalTrigger Could not set trigger delay.", error);
   error = cam_.GetTriggerDelay(&triggerDelay);
   PointGreyCamera::handleError("PointGreyCamera::setExternalTrigger Could not get trigger delay.", error);
+  if (triggerDelay.absValue != delay) {
+    ROS_WARN_STREAM("setExternalTrigger(): delay not set: " << delay << " != " << triggerDelay.absValue);
+  }
   delay = triggerDelay.absValue;
 
   return retVal;
@@ -902,6 +917,9 @@ void PointGreyCamera::setupGigEPacketSize(PGRGuid & guid)
   unsigned int packet_size;
   error = cam.DiscoverGigEPacketSize(&packet_size);
   PointGreyCamera::handleError("PointGreyCamera::connect could not discover GigE packet_size", error);
+
+  ROS_INFO_STREAM("setupGigEPacketSize(): packet_size: " << packet_size);
+
   GigEProperty prop;
   prop.propType = PACKET_SIZE;
   error = cam.GetGigEProperty(&prop);
@@ -909,32 +927,59 @@ void PointGreyCamera::setupGigEPacketSize(PGRGuid & guid)
   prop.value = packet_size;
   error = cam.SetGigEProperty(&prop);
   PointGreyCamera::handleError("PointGreyCamera::connect could not set GigE packet_size", error);
+
+  // check that value was set properly
+  error = cam.GetGigEProperty(&prop);
+  PointGreyCamera::handleError("PointGreyCamera::connect could not get GigE packet_size", error);
+  if (prop.value != packet_size) {
+    ROS_WARN_STREAM("setupGigEPacketSize(): value not set: " << packet_size << " != " << prop.value);
+  }
 }
 
 void PointGreyCamera::setupGigEPacketSize(PGRGuid & guid, unsigned int packet_size)
 {
+  ROS_INFO_STREAM("setupGigEPacketSize(): packet_size: " << packet_size);
+
   GigECamera cam;
   Error error;
   error = cam.Connect(&guid);
   PointGreyCamera::handleError("PointGreyCamera::connect could not connect as GigE camera", error);
+
   GigEProperty prop;
   prop.propType = PACKET_SIZE;
   prop.value = packet_size;
   error = cam.SetGigEProperty(&prop);
   PointGreyCamera::handleError("PointGreyCamera::connect could not set GigE packet_size", error);
+
+  // check that value was set properly
+  error = cam.GetGigEProperty(&prop);
+  PointGreyCamera::handleError("PointGreyCamera::connect could not get GigE packet_size", error);
+  if (prop.value != packet_size) {
+    ROS_WARN_STREAM("setupGigEPacketSize(): value not set: " << packet_size << " != " << prop.value);
+  }
 }
 
 void PointGreyCamera::setupGigEPacketDelay(PGRGuid & guid, unsigned int packet_delay)
 {
+  ROS_INFO_STREAM("setupGigEPacketDelay(): packet_delay: " << packet_delay);
+
   GigECamera cam;
   Error error;
   error = cam.Connect(&guid);
   PointGreyCamera::handleError("PointGreyCamera::connect could not connect as GigE camera", error);
+
   GigEProperty prop;
   prop.propType = PACKET_DELAY;
   prop.value = packet_delay;
   error = cam.SetGigEProperty(&prop);
   PointGreyCamera::handleError("PointGreyCamera::connect could not set GigE packet_delay", error);
+
+  // check that value was set properly
+  error = cam.GetGigEProperty(&prop);
+  PointGreyCamera::handleError("PointGreyCamera::connect could not get GigE packet_delay", error);
+  if (prop.value != packet_delay) {
+    ROS_WARN_STREAM("setupGigEPacketDelay(): value not set: " << packet_delay << " != " << prop.value);
+  }
 }
 
 void PointGreyCamera::connect()
