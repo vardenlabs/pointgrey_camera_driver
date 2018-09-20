@@ -52,6 +52,8 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include <resource_monitor/diagnostics.h> // Embark Diagnostics.
 #include <fstream>
 
+#include <diagnostics_utils/status_pubsub.h>
+
 namespace pointgrey_camera_driver
 {
 
@@ -216,7 +218,12 @@ private:
     ros::NodeHandle &nh = getMTNodeHandle();
     ros::NodeHandle &pnh = getMTPrivateNodeHandle();
 
+    // Get the desired frame_id, set to 'camera' if not found
+    pnh.param<std::string>("frame_id", frame_id_, "camera");
+
     Diagnostics::init(&nh);
+    diagnostics_utils::NodeHealthPublisher::init(&nh, frame_id_);
+    diagnostics_utils::TracePublisher::init(&nh);
 
     // Get a serial number through ros
     int serial = 0;
@@ -269,8 +276,6 @@ private:
     // Get the location of our camera config yaml
     std::string camera_info_url;
     pnh.param<std::string>("camera_info_url", camera_info_url, "");
-    // Get the desired frame_id, set to 'camera' if not found
-    pnh.param<std::string>("frame_id", frame_id_, "camera");
     // Do not call the connectCb function until after we are done initializing.
     boost::mutex::scoped_lock scopedLock(connect_mutex_);
 
@@ -295,22 +300,26 @@ private:
 
     // Set up a diagnosed publisher
     double desired_freq;
-    pnh.param<double>("desired_freq", desired_freq, 7.0);
-    pnh.param<double>("min_freq", min_freq_, desired_freq);
-    pnh.param<double>("max_freq", max_freq_, desired_freq);
+    pnh.param<double>("min_freq", min_freq_, 7.0);
     double freq_tolerance; // Tolerance before stating error on publish frequency, fractional percent of desired frequencies.
     pnh.param<double>("freq_tolerance", freq_tolerance, 0.1);
     int window_size; // Number of samples to consider in frequency
     pnh.param<int>("window_size", window_size, 100);
-    double min_acceptable; // The minimum publishing delay (in seconds) before warning.  Negative values mean future dated messages.
-    pnh.param<double>("min_acceptable_delay", min_acceptable, 0.0);
     double max_acceptable; // The maximum publishing delay (in seconds) before warning.
     pnh.param<double>("max_acceptable_delay", max_acceptable, 0.2);
     ros::SubscriberStatusCallback cb2 = boost::bind(&PointGreyCameraNodelet::connectCb, this);
-    pub_.reset(new diagnostic_updater::DiagnosedPublisher<wfov_camera_msgs::WFOVImage>(nh.advertise<wfov_camera_msgs::WFOVImage>("image", 1, cb2, cb2),
-               updater_,
-               diagnostic_updater::FrequencyStatusParam(&min_freq_, &max_freq_, freq_tolerance, window_size),
-               diagnostic_updater::TimeStampStatusParam(min_acceptable, max_acceptable)));
+
+    const std::string full_image_topic = nh.resolveName("image");
+
+    pub_ = diagnostics_utils::createPublisherWrapper<wfov_camera_msgs::WFOVImage>(
+      nh.advertise<wfov_camera_msgs::WFOVImage>("image", 1, cb2, cb2))
+      
+      // image: min_freq 5hz, max max_acceptable sec old
+      ->monitor(min_freq_ * (1.0 - freq_tolerance), 
+                ros::Duration(max_acceptable),
+                diagnostics_utils::DiagnosticLevel::ERROR,
+                window_size)
+      ->trace("/" + frame_id_);
   }
 
   /**
@@ -496,6 +505,10 @@ private:
             // Get the image from the camera library
             NODELET_DEBUG("Starting a new grab from camera.");
             pg_.grabImage(wfov_image->image, frame_id_);
+            const ros::Time time = ros::Time::now();
+
+            diagnostics_utils::ScopedExecution exec_guard(CALLER_INFO());
+            exec_guard.trace("/" + frame_id_, time);
 
             // Set other values
             wfov_image->header.frame_id = frame_id_;
@@ -506,7 +519,6 @@ private:
 
             wfov_image->temperature = pg_.getCameraTemperature();
 
-            ros::Time time = ros::Time::now();
             wfov_image->header.stamp = time;
             wfov_image->image.header.stamp = time;
 
@@ -526,7 +538,7 @@ private:
             wfov_image->info = *ci_;
 
             // Publish the full message
-            pub_->publish(wfov_image);
+            pub_->publish(wfov_image, CALLER_INFO());
 
             // Publish the message using standard image transport
             if(it_pub_.getNumSubscribers() > 0)
@@ -586,7 +598,7 @@ private:
   boost::shared_ptr<image_transport::ImageTransport> it_; ///< Needed to initialize and keep the ImageTransport in scope.
   boost::shared_ptr<camera_info_manager::CameraInfoManager> cinfo_; ///< Needed to initialize and keep the CameraInfoManager in scope.
   image_transport::CameraPublisher it_pub_; ///< CameraInfoManager ROS publisher
-  boost::shared_ptr<diagnostic_updater::DiagnosedPublisher<wfov_camera_msgs::WFOVImage> > pub_; ///< Diagnosed publisher, has to be a pointer because of constructor requirements
+  diagnostics_utils::PublisherWrapper<wfov_camera_msgs::WFOVImage> pub_;
   ros::Subscriber sub_; ///< Subscriber for gain and white balance changes.
 
   boost::mutex connect_mutex_;
