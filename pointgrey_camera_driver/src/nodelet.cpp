@@ -52,7 +52,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include <resource_monitor/diagnostics.h> // Embark Diagnostics.
 #include <fstream>
 
-#include <diagnostics_utils/status_pubsub.h>
+#include <diagnostics_utils/instrumentation.h>
 
 namespace pointgrey_camera_driver
 {
