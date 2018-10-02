@@ -220,6 +220,7 @@ private:
 
     // Get the desired frame_id, set to 'camera' if not found
     pnh.param<std::string>("frame_id", frame_id_, "camera");
+    trace_frame_ = diagnostics_utils::TracePublisher::trace_frame_from_name(frame_id_);
 
     Diagnostics::init(&nh);
     diagnostics_utils::NodeHealthPublisher::init(&nh, frame_id_);
@@ -319,7 +320,7 @@ private:
                 ros::Duration(max_acceptable),
                 diagnostics_utils::DiagnosticLevel::ERROR,
                 window_size)
-      ->trace("/" + frame_id_);
+      ->trace(trace_frame_);
   }
 
   /**
@@ -508,7 +509,7 @@ private:
             const ros::Time time = ros::Time::now();
 
             diagnostics_utils::ScopedExecution exec_guard(CALLER_INFO());
-            exec_guard.trace("/" + frame_id_, time);
+            exec_guard.trace(trace_frame_, time);
 
             // Set other values
             wfov_image->header.frame_id = frame_id_;
@@ -610,6 +611,7 @@ private:
   PointGreyCamera pg_; ///< Instance of the PointGreyCamera library, used to interface with the hardware.
   sensor_msgs::CameraInfoPtr ci_; ///< Camera Info message.
   std::string frame_id_; ///< Frame id for the camera messages, defaults to 'camera'
+  diagnostics_utils::TraceFrame trace_frame_;
   boost::shared_ptr<boost::thread> pubThread_; ///< The thread that reads and publishes the images.
 
   double gain_;
