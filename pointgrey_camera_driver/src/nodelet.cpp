@@ -218,7 +218,7 @@ private:
     ros::NodeHandle &nh = getMTNodeHandle();
     ros::NodeHandle &pnh = getMTPrivateNodeHandle();
 
-    // Get the desired frame_id, set to 'camera' if not found
+    // Get the frame_id, set to 'camera' if not found
     pnh.param<std::string>("frame_id", frame_id_, "camera");
     trace_frame_ = diagnostics_utils::TracePublisher::trace_frame_from_name(frame_id_);
 
@@ -300,14 +300,13 @@ private:
     updater_.setHardwareID("pointgrey_camera " + cinfo_name.str());
 
     // Set up a diagnosed publisher
-    double desired_freq;
     pnh.param<double>("min_freq", min_freq_, 7.0);
     double freq_tolerance; // Tolerance before stating error on publish frequency, fractional percent of desired frequencies.
-    pnh.param<double>("freq_tolerance", freq_tolerance, 0.1);
+    pnh.param<double>("freq_tolerance", freq_tolerance, 0.100);
     int window_size; // Number of samples to consider in frequency
     pnh.param<int>("window_size", window_size, 100);
-    double max_acceptable; // The maximum publishing delay (in seconds) before warning.
-    pnh.param<double>("max_acceptable_delay", max_acceptable, 0.2);
+    double max_acceptable_delay; // The maximum publishing delay (in seconds) before warning.
+    pnh.param<double>("max_acceptable_delay", max_acceptable_delay, 0.200);
     ros::SubscriberStatusCallback cb2 = boost::bind(&PointGreyCameraNodelet::connectCb, this);
 
     const std::string full_image_topic = nh.resolveName("image");
@@ -317,7 +316,7 @@ private:
       
       // image: min_freq 5hz, max max_acceptable sec old
       ->monitor(min_freq_ * (1.0 - freq_tolerance), 
-                ros::Duration(max_acceptable),
+                ros::Duration(max_acceptable_delay),
                 diagnostics_utils::DiagnosticLevel::ERROR,
                 window_size)
       ->trace(trace_frame_);
