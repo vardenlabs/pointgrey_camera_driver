@@ -4,7 +4,7 @@ project(pointgrey_camera_driver)
 find_package(catkin REQUIRED COMPONENTS
   roscpp roslint nodelet sensor_msgs wfov_camera_msgs
   image_exposure_msgs camera_info_manager image_transport
-  dynamic_reconfigure diagnostic_updater)
+  dynamic_reconfigure diagnostic_updater diagnostics_utils)
 find_package(resource_monitor REQUIRED)
 
 generate_dynamic_reconfigure_options(
@@ -12,7 +12,7 @@ generate_dynamic_reconfigure_options(
 )
 
 catkin_package(CATKIN_DEPENDS
-  image_exposure_msgs nodelet roscpp sensor_msgs wfov_camera_msgs
+  image_exposure_msgs nodelet roscpp sensor_msgs wfov_camera_msgs diagnostics_utils
 )
 
 add_definitions(-std=c++11)
