@@ -49,7 +49,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 
 #include <dynamic_reconfigure/server.h> // Needed for the dynamic_reconfigure gui service to run
 
-#include <resource_monitor/diagnostics.h> // Embark Diagnostics.
 #include <fstream>
 
 #include <diagnostics_utils/instrumentation.h>
@@ -222,7 +221,6 @@ private:
     pnh.param<std::string>("frame_id", frame_id_, "camera");
     trace_frame_ = diagnostics_utils::TracePublisher::trace_frame_from_name(frame_id_);
 
-    Diagnostics::init(&nh);
     diagnostics_utils::NodeHealthPublisher::init(&nh, frame_id_);
     diagnostics_utils::TracePublisher::init(&nh);
 
@@ -375,7 +373,6 @@ private:
 
     while(!boost::this_thread::interruption_requested())   // Block until we need to stop this thread.
     {
-      LOG_TIMING_START("PointGreyCameraNodelet", "devicePoll");
       bool state_changed = state != previous_state;
 
       previous_state = state;
@@ -383,7 +380,6 @@ private:
       switch(state)
       {
         case ERROR:
-          LOG_TIMING_START("PointGreyCameraNodelet", "devicePoll::ERROR");
           // Generally there's no need to stop before disconnecting after an
           // error. Indeed, stop will usually fail.
 #if STOP_ON_ERROR
@@ -408,13 +404,9 @@ private:
             ros::Duration(0.5).sleep(); // sleep for half a second each time
           }
 
-          LOG_TIMING_END("PointGreyCameraNodelet", "devicePoll::ERROR");
-
           break;
 #endif
-          LOG_TIMING_END("PointGreyCameraNodelet", "devicePoll::ERROR");
         case STOPPED:
-          LOG_TIMING_START("PointGreyCameraNodelet", "devicePoll::STOPPED");
           // Try disconnecting from the camera
           try
           {
@@ -431,10 +423,8 @@ private:
             ros::Duration(0.5).sleep(); // sleep for half a second each time
           }
 
-          LOG_TIMING_END("PointGreyCameraNodelet", "devicePoll::STOPPED");
           break;
         case DISCONNECTED:
-          LOG_TIMING_START("PointGreyCameraNodelet", "devicePoll::DISCONNECTED");
           // Try connecting to the camera
           try
           {
@@ -474,11 +464,8 @@ private:
             ros::Duration(0.5).sleep(); // sleep for half a second each time
           }
 
-          LOG_TIMING_END("PointGreyCameraNodelet", "devicePoll::DISCONNECTED");
-
           break;
         case CONNECTED:
-          LOG_TIMING_START("PointGreyCameraNodelet", "devicePoll::CONNECTED");
           // Try starting the camera
           try
           {
@@ -495,10 +482,8 @@ private:
             ros::Duration(0.5).sleep(); // sleep for half a second each time
           }
 
-          LOG_TIMING_END("PointGreyCameraNodelet", "devicePoll::CONNECTED");
           break;
         case STARTED:
-          LOG_TIMING_START("PointGreyCameraNodelet", "devicePoll::STARTED");
           try
           {
             wfov_camera_msgs::WFOVImagePtr wfov_image(new wfov_camera_msgs::WFOVImage);
@@ -544,7 +529,6 @@ private:
             if(it_pub_.getNumSubscribers() > 0)
             {
               sensor_msgs::ImagePtr image(new sensor_msgs::Image(wfov_image->image));
-              LOG_MSG_SENT("PointGreyCameraNodelet", "/cam3/image_color/compressed", image.get()->header.stamp);
               it_pub_.publish(image, ci_);
             }
           }
@@ -563,8 +547,6 @@ private:
             state = ERROR;
           }
 
-          LOG_TIMING_END("PointGreyCameraNodelet", "devicePoll::STARTED");
-
           break;
         default:
           NODELET_ERROR("Unknown camera state %d!", state);
@@ -572,7 +554,6 @@ private:
 
       // Update diagnostics
       updater_.update();
-      LOG_TIMING_END("PointGreyCameraNodelet", "devicePoll");
     }
     NODELET_DEBUG("Leaving thread.");
   }
