@@ -24,7 +24,8 @@ add_definitions(-std=c++11)
 # contains them. We work around this by downloading the archive directly from
 # their website during this step in the build process.
 find_library(POINTGREY_LIB NAMES libflycapture.so.2 flycapture)
-find_path(POINTGREY_INCLUDE_DIR NAMES flycapture/FlyCapture2.h)
+message(STATUS "looking for flycapture/FlyCapture2.h in ${CMAKE_CURRENT_BINARY_DIR}/usr/include")
+find_path(POINTGREY_INCLUDE_DIR NAMES flycapture/FlyCapture2.h HINTS ${CMAKE_CURRENT_BINARY_DIR}/usr/include)
 file(GLOB_RECURSE POINTGREY_HEADER ${POINTGREY_INCLUDE_DIR}*/flycapture/FlyCapture2.h ${CMAKE_CURRENT_BINARY_DIR}/usr/include*/flycapture/FlyCapture2.h)
 
 if(NOT POINTGREY_LIB OR NOT POINTGREY_HEADER)
@@ -44,6 +45,7 @@ else()
     # copy it into the build directory/resolving all symlinks
     message(STATUS "libflycapture found in system library path")
     message(STATUS "libflycapture library: ${POINTGREY_LIB}")
+    message(STATUS "POINTGREY_INCLUDE_DIR: ${POINTGREY_INCLUDE_DIR}")
 
     get_filename_component(REAL_FLYCAPTURE ${POINTGREY_LIB} REALPATH)
     get_filename_component(POINTGREY_LIB ${POINTGREY_LIB} NAME)
