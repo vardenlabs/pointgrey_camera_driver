@@ -1,6 +1,12 @@
 cmake_minimum_required(VERSION 2.8.3)
 project(pointgrey_camera_driver)
 
+find_program(CCACHE_FOUND ccache)
+if (CCACHE_FOUND)
+set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE ccache)
+set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK ccache)
+endif(CCACHE_FOUND)
+
 find_package(catkin REQUIRED COMPONENTS
   roscpp roslint nodelet sensor_msgs wfov_camera_msgs
   image_exposure_msgs camera_info_manager image_transport
