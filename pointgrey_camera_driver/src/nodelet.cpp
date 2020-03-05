@@ -52,6 +52,9 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include <fstream>
 
 #include <diagnostics_utils/instrumentation.h>
+#include "rosgraph_msgs/Clock.h"
+#include <utils/ros/message_filters.h>
+#include <utils/ros/pps_correction.h>
 
 namespace pointgrey_camera_driver
 {
@@ -59,7 +62,8 @@ namespace pointgrey_camera_driver
 class PointGreyCameraNodelet: public nodelet::Nodelet
 {
 public:
-  PointGreyCameraNodelet() {}
+  PointGreyCameraNodelet() {
+  }
 
   ~PointGreyCameraNodelet()
   {
@@ -318,6 +322,8 @@ private:
                 diagnostics_utils::DiagnosticLevel::ERROR,
                 window_size)
       ->trace(trace_frame_);
+
+    pps_clock_poller_.reset(new PollRecentSubscriber<rosgraph_msgs::Clock>(&nh, "/pps_clock", 60));    
   }
 
   /**
@@ -490,7 +496,16 @@ private:
             // Get the image from the camera library
             NODELET_DEBUG("Starting a new grab from camera.");
             pg_.grabImage(wfov_image->image, frame_id_);
-            const ros::Time time = ros::Time::now();
+            const ros::Time now = ros::Time::now();
+
+            const auto pps_clock = pps_clock_poller_->most_recent();
+            if (!pps_clock) {
+              ROS_ERROR("no pps clock received");
+              return;
+            }
+
+            ros::Time time;            
+            std::tie(time, std::ignore) = ros_utils::get_pulse_time(now, pps_clock->clock, ros::Duration(1/20.0), ros::Duration(0.010));
 
             diagnostics_utils::ScopedExecution exec_guard(CALLER_INFO());
             exec_guard.trace(trace_frame_, time);
@@ -581,6 +596,7 @@ private:
   image_transport::CameraPublisher it_pub_; ///< CameraInfoManager ROS publisher
   diagnostics_utils::PublisherWrapper<wfov_camera_msgs::WFOVImage> pub_;
   ros::Subscriber sub_; ///< Subscriber for gain and white balance changes.
+  std::unique_ptr<PollRecentSubscriber<rosgraph_msgs::Clock>> pps_clock_poller_;
 
   boost::mutex connect_mutex_;
 
