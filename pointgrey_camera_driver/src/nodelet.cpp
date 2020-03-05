@@ -504,9 +504,11 @@ private:
               return;
             }
 
-            ros::Time time;            
-            std::tie(time, std::ignore) = ros_utils::get_pulse_time(now, pps_clock->clock, ros::Duration(1/20.0), ros::Duration(0.010));
+            ros::Time time;
+	    ros::Duration time_since_pulse;
+            std::tie(time, time_since_pulse) = ros_utils::get_pulse_time(now, pps_clock->clock, ros::Duration(1/20.0), ros::Duration(0.010));
 
+	    std::cout << "Delay " << (time_since_pulse.toSec() * 1000) << "ms" << std::endl;
             diagnostics_utils::ScopedExecution exec_guard(CALLER_INFO());
             exec_guard.trace(trace_frame_, time);
 
