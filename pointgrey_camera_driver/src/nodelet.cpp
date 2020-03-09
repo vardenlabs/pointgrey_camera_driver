@@ -315,15 +315,15 @@ private:
 
     pub_ = diagnostics_utils::createPublisherWrapper<wfov_camera_msgs::WFOVImage>(
       nh.advertise<wfov_camera_msgs::WFOVImage>("image", 1, cb2, cb2))
-      
+
       // image: min_freq 5hz, max max_acceptable sec old
-      ->monitor(min_freq_ * (1.0 - freq_tolerance), 
+      ->monitor(min_freq_ * (1.0 - freq_tolerance),
                 ros::Duration(max_acceptable_delay),
                 diagnostics_utils::DiagnosticLevel::ERROR,
                 window_size)
       ->trace(trace_frame_);
 
-    pps_clock_poller_.reset(new PollRecentSubscriber<rosgraph_msgs::Clock>(&nh, "/pps_clock", 60));    
+    pps_clock_poller_.reset(new PollRecentSubscriber<rosgraph_msgs::Clock>(&nh, "/pps_clock", 60));
   }
 
   /**
@@ -505,10 +505,11 @@ private:
             }
 
             ros::Time time;
-	    ros::Duration time_since_pulse;
-            std::tie(time, time_since_pulse) = ros_utils::get_pulse_time(now, pps_clock->clock, ros::Duration(1/20.0), ros::Duration(0.010));
+	    ros::Duration capture_delay;
+            std::tie(time, capture_delay) = ros_utils::get_pulse_time(now, pps_clock->clock, ros::Duration(1/20.0), ros::Duration(0.010));
 
-	    std::cout << "Delay " << (time_since_pulse.toSec() * 1000) << "ms" << std::endl;
+            ROS_INFO_STREAM_THROTTLE(1, "Delay " << (capture_delay.toSec() * 1000.0) << "ms");
+
             diagnostics_utils::ScopedExecution exec_guard(CALLER_INFO());
             exec_guard.trace(trace_frame_, time);
 
