@@ -23,6 +23,7 @@
   <build_depend>sensor_msgs</build_depend>
   <build_depend>wfov_camera_msgs</build_depend>
   <build_depend>diagnostics_utils</build_depend>
+  <build_depend>time_sync</build_depend>
   <run_depend>nodelet</run_depend>
   <run_depend>image_exposure_msgs</run_depend>
   <run_depend>roscpp</run_depend>
@@ -37,6 +38,7 @@
   <run_depend>diagnostic_updater</run_depend>
   <run_depend>resource_monitor</run_depend>
   <run_depend>diagnostics_utils</run_depend>
+  <run_depend>time_sync</run_depend>
 
   <export>
     <nodelet plugin="${prefix}/nodelet_plugins.xml" />

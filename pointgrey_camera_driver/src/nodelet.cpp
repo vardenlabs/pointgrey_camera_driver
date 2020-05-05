@@ -54,7 +54,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include <diagnostics_utils/instrumentation.h>
 #include "rosgraph_msgs/Clock.h"
 #include <utils/ros/message_filters.h>
-#include <utils/ros/pps_correction.h>
+#include <time_sync/pps_correction.h>
 
 namespace pointgrey_camera_driver
 {
@@ -506,7 +506,7 @@ private:
 
             ros::Time time;
 	    ros::Duration capture_delay;
-            std::tie(time, capture_delay) = ros_utils::get_pulse_time(now, pps_clock->clock, ros::Duration(1/20.0), ros::Duration(0.010));
+            std::tie(time, capture_delay) = pps_correction::get_pulse_time(now, pps_clock->clock, ros::Duration(1/20.0), ros::Duration(0.010));
 
             ROS_INFO_STREAM_THROTTLE(1, "Delay " << (capture_delay.toSec() * 1000.0) << "ms");
 

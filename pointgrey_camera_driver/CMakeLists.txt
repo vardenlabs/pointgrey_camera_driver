@@ -10,7 +10,7 @@ endif(CCACHE_FOUND)
 find_package(catkin REQUIRED COMPONENTS
   roscpp roslint nodelet sensor_msgs wfov_camera_msgs
   image_exposure_msgs camera_info_manager image_transport
-  dynamic_reconfigure diagnostic_updater diagnostics_utils)
+  dynamic_reconfigure diagnostic_updater diagnostics_utils time_sync)
 find_package(resource_monitor REQUIRED)
 
 generate_dynamic_reconfigure_options(
