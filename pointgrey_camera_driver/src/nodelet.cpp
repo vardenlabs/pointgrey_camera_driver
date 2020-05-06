@@ -228,6 +228,9 @@ private:
     diagnostics_utils::NodeHealthPublisher::init(&nh, frame_id_);
     diagnostics_utils::TracePublisher::init(&nh);
 
+    diag_pub_ = diagnostics_utils::NodeHealthPublisher::get_instance();
+    diag_pub_->create<diagnostics_utils::SimpleStatus>("Delay");
+
     // Get a serial number through ros
     int serial = 0;
 
@@ -297,9 +300,6 @@ private:
     it_.reset(new image_transport::ImageTransport(nh));
     image_transport::SubscriberStatusCallback cb = boost::bind(&PointGreyCameraNodelet::connectCb, this);
     it_pub_ = it_->advertiseCamera("image_raw", 5, cb, cb);
-
-    // Set up diagnostics
-    updater_.setHardwareID("pointgrey_camera " + cinfo_name.str());
 
     // Set up a diagnosed publisher
     pnh.param<double>("min_freq", min_freq_, 7.0);
@@ -508,6 +508,12 @@ private:
 	    ros::Duration capture_delay;
             std::tie(time, capture_delay) = pps_correction::get_pulse_time(now, pps_clock->clock, ros::Duration(1/20.0), ros::Duration(0.010));
 
+            // update diagnostics with the delay correction
+            diag_pub_->get<diagnostics_utils::SimpleStatus>("Delay")->set(
+              diagnostics_utils::DiagnosticLevel::OK,
+              "OK",
+              {{"Correction", capture_delay.toSec()}});
+
             ROS_INFO_STREAM_THROTTLE(1, "Delay " << (capture_delay.toSec() * 1000.0) << "ms");
 
             diagnostics_utils::ScopedExecution exec_guard(CALLER_INFO());
@@ -569,9 +575,6 @@ private:
         default:
           NODELET_ERROR("Unknown camera state %d!", state);
       }
-
-      // Update diagnostics
-      updater_.update();
     }
     NODELET_DEBUG("Leaving thread.");
   }
@@ -603,7 +606,9 @@ private:
 
   boost::mutex connect_mutex_;
 
-  diagnostic_updater::Updater updater_; ///< Handles publishing diagnostics messages.
+  // Handles publishing diagnostics messages.
+  std::shared_ptr<diagnostics_utils::NodeHealthPublisher> diag_pub_;
+
   double min_freq_;
   double max_freq_;
 
