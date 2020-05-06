@@ -42,9 +42,6 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include <wfov_camera_msgs/WFOVImage.h>
 #include <image_exposure_msgs/ExposureSequence.h> // Message type for configuring gain and white balance.
 
-#include <diagnostic_updater/diagnostic_updater.h> // Headers for publishing diagnostic messages.
-#include <diagnostic_updater/publisher.h>
-
 #include <boost/thread.hpp> // Needed for the nodelet to launch the reading thread.
 
 #include <dynamic_reconfigure/server.h> // Needed for the dynamic_reconfigure gui service to run
@@ -55,6 +52,7 @@ THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND 
 #include "rosgraph_msgs/Clock.h"
 #include <utils/ros/message_filters.h>
 #include <time_sync/pps_correction.h>
+#include <std_msgs/Float64.h>
 
 namespace pointgrey_camera_driver
 {
@@ -221,6 +219,10 @@ private:
     ros::NodeHandle &nh = getMTNodeHandle();
     ros::NodeHandle &pnh = getMTPrivateNodeHandle();
 
+    // Get the camera_name, set to 'camera' if not found
+    std::string camera_name;
+    pnh.param<std::string>("camera_name", camera_name, "camera");
+
     // Get the frame_id, set to 'camera' if not found
     pnh.param<std::string>("frame_id", frame_id_, "camera");
     trace_frame_ = diagnostics_utils::TracePublisher::trace_frame_from_name(frame_id_);
@@ -324,6 +326,9 @@ private:
       ->trace(trace_frame_);
 
     pps_clock_poller_.reset(new PollRecentSubscriber<rosgraph_msgs::Clock>(&nh, "/pps_clock", 60));
+
+    // debug publisher for delay corrections
+    delay_correction_pub_ = nh.advertise<std_msgs::Float64>("/debug/delay_correction/" + camera_name, 1);
   }
 
   /**
@@ -514,7 +519,10 @@ private:
               "OK",
               {{"Correction", capture_delay.toSec()}});
 
-            ROS_INFO_STREAM_THROTTLE(1, "Delay " << (capture_delay.toSec() * 1000.0) << "ms");
+	    // publish a debug message with delay correction (in sec)
+	    std_msgs::Float64 delay_msg;
+	    delay_msg.data = capture_delay.toSec();
+	    delay_correction_pub_.publish(delay_msg);
 
             diagnostics_utils::ScopedExecution exec_guard(CALLER_INFO());
             exec_guard.trace(trace_frame_, time);
@@ -601,6 +609,8 @@ private:
   boost::shared_ptr<camera_info_manager::CameraInfoManager> cinfo_; ///< Needed to initialize and keep the CameraInfoManager in scope.
   image_transport::CameraPublisher it_pub_; ///< CameraInfoManager ROS publisher
   diagnostics_utils::PublisherWrapper<wfov_camera_msgs::WFOVImage> pub_;
+  ros::Publisher delay_correction_pub_;
+
   ros::Subscriber sub_; ///< Subscriber for gain and white balance changes.
   std::unique_ptr<PollRecentSubscriber<rosgraph_msgs::Clock>> pps_clock_poller_;
 
