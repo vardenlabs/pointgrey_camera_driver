@@ -221,7 +221,6 @@ private:
     pnh.param<std::string>("frame_id", frame_id_, "camera");
     trace_frame_ = diagnostics_utils::TracePublisher::trace_frame_from_name(frame_id_);
 
-    diagnostics_utils::NodeHealthPublisher::init(&nh, frame_id_);
     diagnostics_utils::TracePublisher::init(&nh);
 
     // Get a serial number through ros
