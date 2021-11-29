@@ -121,8 +121,4 @@ if (CATKIN_ENABLE_TESTING)
   roslaunch_add_file_check(launch/bumblebee.launch)
   roslaunch_add_file_check(launch/camera.launch)
   roslaunch_add_file_check(launch/stereo.launch)
-
-  # TODO: install in ci I guess
-  #find_package(roslint REQUIRED)
-  #roslint_cpp()
 endif()
