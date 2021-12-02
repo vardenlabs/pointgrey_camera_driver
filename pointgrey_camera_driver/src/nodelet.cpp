@@ -312,10 +312,6 @@ private:
       nh.advertise<wfov_camera_msgs::WFOVImage>("image", 1, cb2, cb2))
       
       // image: min_freq 5hz, max max_acceptable sec old
-      ->monitor(min_freq_ * (1.0 - freq_tolerance), 
-                ros::Duration(max_acceptable_delay),
-                diagnostics_utils::DiagnosticLevel::ERROR,
-                window_size)
       ->trace(trace_frame_);
   }
 
