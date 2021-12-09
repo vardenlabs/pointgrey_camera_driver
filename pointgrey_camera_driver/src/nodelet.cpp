@@ -221,7 +221,6 @@ private:
     pnh.param<std::string>("frame_id", frame_id_, "camera");
     trace_frame_ = diagnostics_utils::TracePublisher::trace_frame_from_name(frame_id_);
 
-    diagnostics_utils::NodeHealthPublisher::init(&nh, frame_id_);
     diagnostics_utils::TracePublisher::init(&nh);
 
     // Get a serial number through ros
@@ -323,10 +322,6 @@ private:
       nh.advertise<wfov_camera_msgs::WFOVImage>("image", 1, cb2, cb2))
       
       // image: min_freq 5hz, max max_acceptable sec old
-      ->monitor(min_freq_ * (1.0 - freq_tolerance), 
-                ros::Duration(max_acceptable_delay),
-                diagnostics_utils::DiagnosticLevel::ERROR,
-                window_size)
       ->trace(trace_frame_);
   }
 
