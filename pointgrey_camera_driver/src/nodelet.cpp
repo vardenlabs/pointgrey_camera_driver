@@ -221,7 +221,6 @@ private:
     pnh.param<std::string>("frame_id", frame_id_, "camera");
     trace_frame_ = diagnostics_utils::TracePublisher::trace_frame_from_name(frame_id_);
 
-    diagnostics_utils::NodeHealthPublisher::init(&nh, frame_id_);
     diagnostics_utils::TracePublisher::init(&nh);
 
     // Get a serial number through ros
@@ -297,6 +296,16 @@ private:
     // Set up diagnostics
     updater_.setHardwareID("pointgrey_camera " + cinfo_name.str());
 
+    pnh.param<bool>("adjust_timestamp", adjust_timestamp_, false);
+
+    int trigger_period_ms;
+    pnh.param<int>("trigger_period_ms", trigger_period_ms, 50);
+    trigger_period_ns_ = trigger_period_ms * 1e6;
+
+    int min_transfer_time_ms;
+    pnh.param<int>("min_transfer_time_ms", min_transfer_time_ms, 15);
+    min_transfer_time_ns_ = min_transfer_time_ms * 1e6;
+
     // Set up a diagnosed publisher
     pnh.param<double>("min_freq", min_freq_, 7.0);
     double freq_tolerance; // Tolerance before stating error on publish frequency, fractional percent of desired frequencies.
@@ -313,10 +322,6 @@ private:
       nh.advertise<wfov_camera_msgs::WFOVImage>("image", 1, cb2, cb2))
       
       // image: min_freq 5hz, max max_acceptable sec old
-      ->monitor(min_freq_ * (1.0 - freq_tolerance), 
-                ros::Duration(max_acceptable_delay),
-                diagnostics_utils::DiagnosticLevel::ERROR,
-                window_size)
       ->trace(trace_frame_);
   }
 
@@ -490,7 +495,21 @@ private:
             // Get the image from the camera library
             NODELET_DEBUG("Starting a new grab from camera.");
             pg_.grabImage(wfov_image->image, frame_id_);
-            const ros::Time time = ros::Time::now();
+
+            // Adjust timestamp to the nearest trigger time
+            ros::Time time = ros::Time::now();
+            if (adjust_timestamp_) {
+                uint64_t nsec = time.toNSec();
+                uint64_t offset = nsec % trigger_period_ns_;
+
+                const uint64_t shutter_time = config_.shutter_speed * 1e9;
+                if (min_transfer_time_ns_ + shutter_time > trigger_period_ns_) {
+                    offset += trigger_period_ns_;
+                }
+
+                nsec -= offset;
+                time.fromNSec(nsec);
+            }
 
             diagnostics_utils::ScopedExecution exec_guard(CALLER_INFO());
             exec_guard.trace(trace_frame_, time);
@@ -614,6 +633,10 @@ private:
   int packet_size_;
   /// GigE packet delay:
   int packet_delay_;
+
+  uint64_t trigger_period_ns_;
+  uint64_t min_transfer_time_ns_;
+  bool adjust_timestamp_;
 
   /// Configuration:
   pointgrey_camera_driver::PointGreyConfig config_;
