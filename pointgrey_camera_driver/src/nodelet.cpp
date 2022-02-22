@@ -221,11 +221,11 @@ private:
     pnh.param<std::string>("frame_id", frame_id_, "camera");
 
     // Waiting for exposure node (a prerequisite) to finish being started for cam8
-    if (frame_id == "cam8")
+    if (frame_id_ == "cam8")
     {
-      const bool ret = ros::service::waitForService("/dynamic_exposure/"+frame_id+"/ready", 10000); // 10 seconds
+      const bool ret = ros::service::waitForService("/dynamic_exposure/"+frame_id_+"/ready", 10000); // 10 seconds
       if (!ret) {
-        ROS_ERROR_STREAM("Timed out waiting for "<<frame_id<<" exposure node to start. Exiting");
+        ROS_ERROR_STREAM("Timed out waiting for "<<frame_id_<<" exposure node to start. Exiting");
         return 1;
       }
     }
