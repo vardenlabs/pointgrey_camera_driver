@@ -219,6 +219,17 @@ private:
 
     // Get the frame_id, set to 'camera' if not found
     pnh.param<std::string>("frame_id", frame_id_, "camera");
+
+    // Waiting for exposure node (a prerequisite) to finish being started for cam8
+    if (frame_id == "cam8")
+    {
+      const bool ret = ros::service::waitForService("/dynamic_exposure/"+frame_id+"/ready", 10000); // 10 seconds
+      if (!ret) {
+        ROS_ERROR_STREAM("Timed out waiting for "<<frame_id<<" exposure node to start. Exiting");
+        return 1;
+      }
+    }
+    // Start trace frame publisher
     trace_frame_ = diagnostics_utils::TracePublisher::trace_frame_from_name(frame_id_);
 
     diagnostics_utils::TracePublisher::init(&nh);
