@@ -160,6 +160,18 @@ private:
   void connectCb()
   {
     NODELET_DEBUG("Connect callback!");
+
+    // Waiting for exposure node (a prerequisite) to finish being started for cam8
+    if (frame_id_ == "cam8")
+    {
+      ROS_INFO_STREAM("Waiting for cam8 exposure node to finish starting...");
+      const bool ret = ros::service::waitForService("/dynamic_exposure/"+frame_id_+"/ready", 20000); // 20 seconds
+      if (!ret) {
+        ROS_ERROR_STREAM("Timed out waiting for "<<frame_id_<<" exposure node to start. Exiting");
+        return;
+      }
+    }
+
     boost::mutex::scoped_lock scopedLock(connect_mutex_); // Grab the mutex.  Wait until we're done initializing before letting this function through.
     // Check if we should disconnect (there are 0 subscribers to our data)
     if(it_pub_.getNumSubscribers() == 0 && pub_->getPublisher().getNumSubscribers() == 0)
@@ -219,17 +231,6 @@ private:
 
     // Get the frame_id, set to 'camera' if not found
     pnh.param<std::string>("frame_id", frame_id_, "camera");
-
-    // Waiting for exposure node (a prerequisite) to finish being started for cam8
-    if (frame_id_ == "cam8")
-    {
-      const bool ret = ros::service::waitForService("/dynamic_exposure/"+frame_id_+"/ready", 10000); // 10 seconds
-      if (!ret) {
-        ROS_ERROR_STREAM("Timed out waiting for "<<frame_id_<<" exposure node to start. Exiting");
-        return 1;
-      }
-    }
-    // Start trace frame publisher
     trace_frame_ = diagnostics_utils::TracePublisher::trace_frame_from_name(frame_id_);
 
     diagnostics_utils::TracePublisher::init(&nh);
