@@ -165,10 +165,11 @@ private:
     if (frame_id_ == "cam8")
     {
       ROS_INFO_STREAM("Waiting for cam8 exposure node to finish starting...");
-      const bool ret = ros::service::waitForService("/dynamic_exposure/"+frame_id_+"/ready", 20000); // 20 seconds
+      const bool ret = ros::service::waitForService("/dynamic_exposure/"+frame_id_+"/ready", ros::Duration(20.0)); // 20 seconds
       if (!ret) {
-        ROS_ERROR_STREAM("Timed out waiting for "<<frame_id_<<" exposure node to start. Exiting");
-        return;
+        std::string error_msg = "Timed out waiting for cam8 exposure node to start. Exiting";
+        ROS_ERROR_STREAM(error_msg);
+        throw std::runtime_error(error_msg);
       }
     }
 
