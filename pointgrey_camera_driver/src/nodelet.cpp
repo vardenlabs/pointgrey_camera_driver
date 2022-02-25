@@ -160,6 +160,19 @@ private:
   void connectCb()
   {
     NODELET_DEBUG("Connect callback!");
+
+    // Waiting for exposure node (a prerequisite) to finish being started for cam8
+    if (frame_id_ == "cam8")
+    {
+      ROS_INFO_STREAM("Waiting for cam8 exposure node to finish starting...");
+      const bool ret = ros::service::waitForService("/dynamic_exposure/"+frame_id_+"/ready", ros::Duration(20.0)); // 20 seconds
+      if (!ret) {
+        std::string error_msg = "Timed out waiting for cam8 exposure node to start. Exiting";
+        ROS_ERROR_STREAM(error_msg);
+        throw std::runtime_error(error_msg);
+      }
+    }
+
     boost::mutex::scoped_lock scopedLock(connect_mutex_); // Grab the mutex.  Wait until we're done initializing before letting this function through.
     // Check if we should disconnect (there are 0 subscribers to our data)
     if(it_pub_.getNumSubscribers() == 0 && pub_->getPublisher().getNumSubscribers() == 0)
