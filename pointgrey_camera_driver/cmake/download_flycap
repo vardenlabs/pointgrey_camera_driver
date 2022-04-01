@@ -21,15 +21,12 @@
 # NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF THE
 # POSSIBILITY OF SUCH DAMAGE.
 
-import cookielib
-import cStringIO
 import logging
 import shutil
 import subprocess
 import sys
 import tarfile
 import urllib
-import urllib2
 import os
 
 logging.basicConfig(level=logging.INFO)
@@ -123,14 +120,14 @@ if arch.startswith('arm'):
     os.mkdir(os.path.join(include_path, flycap_folder))
 
     for files in include_files:
-	if files.endswith(".h"):
+        if files.endswith(".h"):
             shutil.move(os.path.join(include_path, files), os.path.join(include_path, flycap_folder))
 
     shutil.copyfile(shared_library, library_dest)
 else:
     for deb in debs:
         logging.info("Extracting: %s", deb)
-    	subprocess.check_call(['dpkg', '--extract', deb, '.'])
+        subprocess.check_call(['dpkg', '--extract', deb, '.'])
 
     logging.info("Copying shared library.")
     shutil.copyfile(shared_library, library_dest)
