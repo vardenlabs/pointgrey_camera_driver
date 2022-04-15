@@ -211,7 +211,7 @@ private:
     rit_pub_ = rit_->advertiseCamera("image_raw", 5);
 
     // Set up diagnostics
-    updater_.setHardwareID("pointgrey_camera " + serial);
+    updater_.setHardwareID("pointgrey_camera " + std::to_string(serial));
 
     ///< @todo Move this to diagnostics
     temp_pub_ = nh.advertise<std_msgs::Float64>("temp", 5);
@@ -349,9 +349,7 @@ private:
   ros::Subscriber sub_; ///< Subscriber for gain and white balance changes.
 
   diagnostic_updater::Updater updater_; ///< Handles publishing diagnostics messages.
-  double min_freq_;
-  double max_freq_;
-
+  
   PointGreyCamera pg_; ///< Instance of the PointGreyCamera library, used to interface with the hardware.
   sensor_msgs::CameraInfoPtr ci_; ///< Camera Info message.
   std::string frame_id_; ///< Frame id for the camera messages, defaults to 'camera'

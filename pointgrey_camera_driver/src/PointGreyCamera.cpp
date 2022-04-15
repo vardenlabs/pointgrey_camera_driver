@@ -1128,6 +1128,8 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
           case BGGR:
             imageEncoding = sensor_msgs::image_encodings::BAYER_BGGR16;
             break;
+          default:
+            break;
         }
       }
       else
@@ -1146,6 +1148,8 @@ void PointGreyCamera::grabImage(sensor_msgs::Image &image, const std::string &fr
         case BGGR:
           imageEncoding = sensor_msgs::image_encodings::BAYER_BGGR8;
           break;
+        default:
+            break;
         }
       }
     }
@@ -1219,12 +1223,11 @@ void PointGreyCamera::grabStereoImage(sensor_msgs::Image &image, const std::stri
         case BGGR:
           imageEncoding = sensor_msgs::image_encodings::BAYER_BGGR8;
           break;
+        default:
+          break;
         }
     }
-    else     // Mono camera
-    {
-      imageEncoding = sensor_msgs::image_encodings::MONO8;
-    }
+
 
     // Set up the output images
     image.encoding = imageEncoding;

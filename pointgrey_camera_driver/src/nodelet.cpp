@@ -618,7 +618,6 @@ private:
 
   diagnostic_updater::Updater updater_; ///< Handles publishing diagnostics messages.
   double min_freq_;
-  double max_freq_;
 
   PointGreyCamera pg_; ///< Instance of the PointGreyCamera library, used to interface with the hardware.
   sensor_msgs::CameraInfoPtr ci_; ///< Camera Info message.
